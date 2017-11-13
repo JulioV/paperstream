@@ -1,0 +1,15 @@
+{
+  "name": "diary_encoding",
+  "version": "1.0.0",
+  "description": "diary encoding",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Julio Vega",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0"
+  }
+}

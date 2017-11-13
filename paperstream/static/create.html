@@ -1,0 +1,56 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="w3.css">
+    <link rel="stylesheet" href="general.css">
+</head>
+
+<body>
+    <div class="w3-row" style="margin-top:100px" id="divCreate">
+        <div class="w3-display-container" style="height:500px;">
+            <div class="w3-card-4 w3-display-topmiddle" style="width:50%">
+                <div class="w3-container w3-blue-gray w3-center">
+                    <h2> Create paper diaries </h2>
+                </div>
+                <div class="w3-container w3-padding-large w3-col s6">
+                    <h4>PDF templates of the diaries to create:</h4>
+                    <ul id="diaries_to_create" class="w3-ul"></ul>
+                </div>
+                <div class="w3-container w3-padding-large w3-col s6">
+                    <label class="w3-text-blue">
+                        <b>Pages in each diary</b>
+                    </label>
+                    <input id="pages" class="w3-input w3-border" style="width:300px;margin-bottom:20px" />
+
+                    <label class="w3-text-blue">
+                        <b>Starting date of each diary (DD/MM/YYY)</b>
+                    </label>
+                    <input id="date" class="w3-input w3-border" style="width:300px;margin-bottom:20px" />
+
+                    <label class="w3-text-blue">
+                        <b>Researcher email</b> (optional)</label>
+                    <input id="email" class="w3-input w3-border" style="width:300px;margin-bottom:20px" />
+
+                    <label class="w3-text-blue">
+                        <b> Font of header and footer</b> (optional)</label>
+                    <input id="font" class="w3-input w3-border" style="width:300px;margin-bottom:20px" />
+
+                </div>
+                <div class="w3-container w3-center w3-margin-bottom">
+                    <button id="createDiaries" class="w3-button w3-blue w3-large">Create Diaries</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+<script src="jquery-3.2.1.js"></script>
+<script src="loadingoverlay.min.js"></script>
+<script type="text/javascript" src="async.min.js"></script>
+<link href="noty.css" rel="stylesheet">
+<script src="noty.js" type="text/javascript"></script>
+<script src="create.js"></script>
+</script>
+
+</html>

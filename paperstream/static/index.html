@@ -1,0 +1,119 @@
+<html>
+
+<head>
+    <script src="jquery-3.2.1.js"></script>
+    <link rel="stylesheet" href="w3.css">
+    <link rel="stylesheet" href="general.css">
+</head>
+
+<body>
+    <div class="w3-row" style="margin-top:7%">
+        <div id="divCreate" class="w3-col s6">
+            <div class="w3-display-container" style="height:700px;">
+                <div class="w3-card-4 w3-display-topmiddle" style="width:75%">
+                    <div class="w3-container w3-blue-gray w3-center">
+                        <h2> Create paper diaries </h2>
+                    </div>
+                    <div class="w3-container w3-padding-large">
+
+                        <div class="table table-striped" class="files" id="previews">
+                            <div id="dropZone1" style="display: None"></div>
+                            <div id="dropZone2" style="display: None"></div>
+                            <div id="dropZone3" style="display: None"></div>
+                            <div id="template" class="file-row" style="display: None"></div>
+                        </div>
+
+                        <div class="w3-row">
+                            <div class="w3-col s8">
+                                <h5>1.- Load one PDF diary template for each participant</h5>
+                            </div>
+                            <div class="w3-col s4">
+                                <button id="uploadTemplates" class="w3-button w3-blue w3-large w3-right loadCreationTemplate-button">Load Templates</button>
+                            </div>
+                        </div>
+
+                        <div class="w3-row">
+                            <div class="w3-col s12">
+                                <div id="progress-bar-container" class="w3-light-grey" style="width: 100%; opacity: 0">
+                                    <div id="progress-bar" class="w3-blue" style="width:0%; height:20px"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <ul class="w3-ul w3-margin" id="diariesTemplates">
+                        </ul>
+                        <button id="deleteCreationTemplates" class="w3-button w3-red w3-small w3-right">Delete all templates</button>
+                    </div>
+                    <div class="w3-container w3-center w3-margin-bottom">
+                        <button id="createDiaries" class="w3-button w3-blue w3-large">Go to Create Diaries</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="divEncode" class="w3-col s6">
+            <div class="w3-display-container" style="height:500px;">
+                <div class="w3-card-4 w3-display-topmiddle" style="width:75%">
+                    <div class="w3-container w3-blue-gray w3-center">
+                        <h2> Encode paper diaries </h2>
+                    </div>
+                    <div class="w3-container w3-padding-large">
+                        <div class="w3-row">
+                            <div class="w3-col s8">
+                                <h5>1.- Load a scanned image of one page of your diary without any pen marks (only one file allowed)</h5>
+                            </div>
+                            <div class="w3-col s4">
+                                <button id="loadEncodingTemplate" class="w3-button w3-blue w3-large w3-right loadEncodingTemplate-button">Load Template</button>
+                            </div>
+                        </div>
+
+                        <div class="w3-row">
+                            <div class="w3-half">
+                                <ul class="w3-ul" id="encodingTemplateList"></ul>
+                            </div>
+                            <div class="w3-half">
+                                <button id="deleteEncodingTemplate" class="w3-button w3-red w3-small w3-right">Delete template</button>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="w3-container w3-padding-large">
+                        <div class="w3-row">
+                            <div class="w3-col s8">
+                                <h5>2.- Load the scanned tiff files of the diaries to encode</h5>
+                            </div>
+                            <div class="w3-col s4">
+                                <button id="loadEncodingDiaries" class="w3-button w3-blue w3-large w3-right loadEncodingDiaries-button">Load Diaries</button>
+                            </div>
+                        </div>
+
+                        <div class="w3-row">
+                            <div class="w3-col s12">
+                                <div id="progress-bar-encoding-container" class="w3-light-grey" style="width: 100%; opacity: 0">
+                                    <div id="progress-bar-encoding" class="w3-blue" style="width:0%; height:20px"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w3-row">
+                            <ul class="w3-ul" id="encodingDiariesList"></ul>
+                            <button id="deleteEncodingDiaries" class="w3-button w3-red w3-small w3-right">Delete all diaries</button>
+                        </div>
+                    </div>
+
+
+                    <div class="w3-container w3-center w3-margin-bottom">
+                        <button id="encodeDiaries" class="w3-button w3-blue w3-large">Go to Encode Diaries</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <link href="noty.css" rel="stylesheet">
+    <script src="noty.js" type="text/javascript"></script>
+    <link href="dropzone.css" rel="stylesheet">
+    <script src="dropzone.js"></script>
+    <script src="landingPage.js"></script>
+
+
+</body>
+
+</html>

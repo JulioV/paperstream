@@ -1,0 +1,129 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="w3.css">
+    <link rel="stylesheet" href="general.css">
+    
+</head>
+
+<body>
+    <div class="w3-row" style="margin-top:1%">
+        <div class="left_div w3-col s6">
+            <div class="w3-display-container " style="height:918px;">
+                <div class="w3-display-topmiddle" style="width: 570px; height: 918px; user-select: none;">
+                    <canvas id="backgrond" width="570" height="918" style="background: url('template.png'); background-size: 570px 918px;position: absolute; user-select: none;"></canvas>
+                    <canvas id="c" width="570" height="918" style="border:2px solid #2196F3;position: absolute; user-select: none;"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="right_div w3-col s6">
+            <div class="w3-display-container" style="height:918px;">
+                <div class="w3-card-4 w3-display-topmiddle" style="width:75%">
+                    <div class="w3-container w3-blue-gray w3-center">
+                        <h2> Create rubric for encoding </h2>
+                    </div>
+                    <div class="w3-container w3-padding-large w3-center">
+                        <div class="w3-row-padding">
+                            <div class="w3-third">
+                                <select id="entries_combo" class="w3-select">
+                                    <option value="default">Add an entry first...</option>
+                                </select>
+                            </div>
+                            <div class="w3-third">
+                                <button id="addEntry" class="w3-button w3-blue w3-large" style="width:100%;margin-bottom: 20px">Add Entry</button>
+                            </div>
+                            <div class="w3-third">
+                                <button id="duplicateEntry" class="w3-button w3-blue w3-large" style="width:100%;">Duplicate Entry</button>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="w3-row-padding">
+                            <div class="w3-third">
+                                    <label class="w3-text-blue w3-left">
+                                            <b id="labelToogleAnswerSpace">Start Adding Answer Spaces</b>
+                                        </label>
+                                <label class="switch">
+                                    <input id="toogleAnswerSpace" type="checkbox">
+                                    <span class="slider round"></span>
+                                </label>
+                                <!-- <button id="toogleMarkArea" class="w3-button w3-blue w3-large w3-margin-bottom">Start Adding Mark Areas</button> -->
+                            </div>
+                            <div class="w3-third">
+                                <label class="w3-text-blue w3-left">
+                                    <b>Variable</b>
+                                </label>
+                                <input id="variable" class="w3-input w3-border" style="width:100%;margin-bottom:20px" />
+                            </div>
+                            <div class="w3-third">
+                                <label class="w3-text-blue w3-left">
+                                    <b>Value</b>
+                                </label>
+                                <input id="value" class="w3-input w3-border" style="width:100%;margin-bottom:20px" />
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="w3-card-4 w3-display-middle" style="width:75%">
+                    <div class="w3-container w3-blue-gray w3-center">
+                        <h2> Canvas backup </h2>
+                    </div>
+                    <div class="w3-container w3-padding-large w3-center">
+                        <div class="w3-row-padding w3-padding-small">
+                            <div class="w3-half">
+                                Download Backup
+                            </div>
+                            <div class="w3-half">
+                                <button id="downloadCanvasBackup" class="w3-button w3-blue w3-large">Download</button>
+                            </div>
+                        </div>
+                        <div class="w3-row-padding w3-padding-small">
+                            <div class="w3-half">
+                                Load Backup
+                            </div>
+                            <div class="w3-half">
+                                <input id="loadCSVCanvasBackup" type="file" value="Load Canvas Backup" class="w3-button w3-blue w3-large" style="width: 100%"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="w3-card-4 w3-display-bottommiddle" style="width:75%">
+                    <div class="w3-container w3-blue-gray w3-center">
+                        <h2> Encode Diaries </h2>
+                    </div>
+                    <div class="w3-container w3-padding-large">
+                        <div class="w3-row">
+                            <div class="w3-half w3-container">
+                                <h4>Diaries to encode:</h4>
+                                <ul id="diariesToEncode" class="w3-ul"></ul>
+                            </div>
+                            <div class="w3-half w3-container">
+                                <label class="w3-text-blue">
+                                    <b> Starting date of diaries (DD/MM/YYY)</b>
+                                </label>
+                                <input id="date" class="w3-input w3-border" style="width:100%;margin-bottom:20px" />
+                                <div class="w3-margin-bottom">
+                                    <button id="encodeDiaries" class="w3-button w3-blue w3-large encodeDiaries">Encode Diaries</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script src="fabric.js"></script>
+<script src="jquery-3.2.1.js"></script>
+<script src="jquery.csv.js"></script>
+<script src="loadingoverlay.min.js"></script>
+<script type="text/javascript" src="async.min.js"></script>
+<link href="noty.css" rel="stylesheet">
+<script src="noty.js" type="text/javascript"></script>
+<script src="encode.js"></script>
+</script>
+
+</html>
