@@ -295,7 +295,7 @@ def set_font(font):
             font = "Arial"
         elif try_set_font("FreeSans"):
             font = "FreeSans"
-    print("The font {} does not exist in your system, using {}".format(old_font, font))
+        print("The font {} does not exist in your system, using {}".format(old_font, font))
     return font
 
 def main(pages, starting_date, email, font):

@@ -9,8 +9,8 @@
 ---
 
 ## History
- 
-Version 1.0 (2017-11-11) - First release.
+Version 1.0.1 (2018-01-21) Fix bug with font textbox 
+Version 1.0.0 (2017-11-11) - First release.
  
 ## Credits
  
