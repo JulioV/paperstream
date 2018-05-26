@@ -88,6 +88,12 @@
               a.style.display = 'none';
               document.body.appendChild(a);
               a.click();
+
+              new Noty({
+                text: 'Zip file with diaries created.',
+                type: 'success',
+                theme: 'metroui',
+              }).show();
             })
             .fail((xhr, status, errorZip) => {
               console.log('Error creating zip');

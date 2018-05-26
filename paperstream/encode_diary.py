@@ -1,5 +1,5 @@
 """
-Encode a diary. The diary must be scanned into a tiff file. The rubric to encode it must be
+Encode a diary. The diary must be scanned into a tiff/png file. The rubric to encode it must be
 created through the web interface.
 
 Julio Vega
@@ -14,6 +14,9 @@ import PyPDF2
 import csv
 import hashlib
 import sys
+import zipfile
+from natsort import natsorted, ns
+from pathlib import Path
 from PIL import Image, ImageOps, ImageDraw
 
 def resource_path(relative_path):
@@ -40,11 +43,14 @@ DIARIES_TO_ENCODE_DIR = resource_path("input/3_diaries_to_encode/")
 
 # Threasholds to identify the corner markers (hull area, hull perimeter, bounding box area)
 MARKERS_THRESHOLDS = (12500, 850, 45000)
+
 # Width of the extracted area image in pixels
 AREA_IMAGE_WIDTH = 2048
+
 # Separation between horizontal L-shaped corner marks is 340, between vertical ones is 548
 AREA_IMAGE_HEIGHT = math.ceil(AREA_IMAGE_WIDTH * (548/340.0))
 
+# Percentage of black pixels that must be different between two answer marks to consider it answered
 MARK_BLACK_THRESHOLD = 1.3
 
 def normalize(im):
@@ -125,10 +131,37 @@ def perspective_transform(img, points):
 
 def get_first_page_answer_area(source_file):
     """Get the answer area of the first page of source_file as an image"""
-    areas_path = extract_answer_areas_from_image(source_file, number_pages=1)
+    areas_path = extract_answer_areas_from_image(source_file, page_limit=1)
     return cv2.imread(areas_path[0])
 
-def extract_answer_areas_from_image(source_file, print_corner_markers=False, number_pages=0):
+def save_individual_pages_to_disk(diary):
+    file_name, extension = os.path.splitext(os.path.basename(diary))
+    save_dir = os.path.join(EXTRACTED_PAGES_DIR, file_name)
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    images_paths = []
+
+    if extension == ".png":
+        images_paths.append(diary)
+    elif extension == ".zip":
+        zip_ref = zipfile.ZipFile(diary, 'r')
+        zip_ref.extractall(save_dir)
+        zip_ref.close()
+        unzipped_pages = get_files_in_directory(save_dir, ".png")
+        images_paths += unzipped_pages
+    elif extension == ".tif":
+        img = Image.open(diary)
+        pages = img.n_frames
+        for i in range(0, pages):
+            img.seek(i)
+            page_path = os.path.join(save_dir, "page_{}.tif".format(i))
+            # Save individual pages as images
+            img.save(page_path)
+            images_paths.append(page_path)
+
+    return images_paths
+
+def extract_answer_areas_from_image(source_file, print_corner_markers=False, page_limit=0):
     """Extracts as single images the answer areas of each page of source_fle (a tiff file)
     Returns a list with the path to each area file.abs
 
@@ -145,67 +178,55 @@ def extract_answer_areas_from_image(source_file, print_corner_markers=False, num
         - Save each area to a file
     """
     extracted_answer_area_paths = []
-    img = Image.open(source_file)
-    if number_pages > 0:
-        pages = number_pages
-    else:
-        pages = img.n_frames
-    for i in range(0, pages):
-        try:
-            img.seek(i)
+    individual_pages_paths = (save_individual_pages_to_disk(source_file))
 
-            # Create output folder for individual pages
-            mark_folder_per_diary = os.path.join(EXTRACTED_PAGES_DIR,
-                                                 os.path.splitext(os.path.basename(source_file))[0])
-            if not os.path.exists(mark_folder_per_diary):
-                os.makedirs(mark_folder_per_diary)
-            page_path = os.path.join(mark_folder_per_diary, "page_{}.tif".format(i))
+    page_number = 0
+    for page_path in individual_pages_paths:
+        if page_limit == 0 or (page_limit > 0 and page_number < page_limit):
+            try:
+                # Load page as an Open CV image
+                original_image = cv2.imread(page_path)
 
-            # Save individual pages as images
-            img.save(page_path)
+                # Transform the image
+                blurred_image = cv2.GaussianBlur(original_image, (11, 11), 10)
+                normalised_image = normalize(cv2.cvtColor(blurred_image, cv2.COLOR_BGR2GRAY))
+                ret, binary_image = cv2.threshold(normalised_image, 127, 255, cv2.THRESH_BINARY)
 
-            # Load page as an Open CV image
-            original_image = cv2.imread(page_path)
+                # Get the image black contours
+                contours = get_contours(binary_image)
 
-            # Transform the image
-            blurred_image = cv2.GaussianBlur(original_image, (11, 11), 10)
-            normalised_image = normalize(cv2.cvtColor(blurred_image, cv2.COLOR_BGR2GRAY))
-            ret, binary_image = cv2.threshold(normalised_image, 127, 255, cv2.THRESH_BINARY)
+                # Identify the corners from the contours
+                corners = get_corners(contours)
 
-            # Get the image black contours
-            contours = get_contours(binary_image)
+                # Save the image with contours for debuggin purposes
+                cv2.drawContours(original_image, corners, -1, (0, 255, 0), 3)
+                if print_corner_markers:
+                    cv2.imwrite(EXTRACTED_PAGES_DIR + "page_contours{}.tif".format(page_number), original_image)
 
-            # Identify the corners from the contours
-            corners = get_corners(contours)
+                # Get the area_markers that frame the answer area of a page
+                area_markers = order_points(get_outmost_points(corners))
 
-            # Save the image with contours for debuggin purposes
-            cv2.drawContours(original_image, corners, -1, (0, 255, 0), 3)
-            if print_corner_markers:
-                cv2.imwrite(EXTRACTED_PAGES_DIR + "page_contours{}.tif".format(i), original_image)
+                # Get the answer area of a pge
+                extracted_area = perspective_transform(original_image, area_markers)
 
-            # Get the area_markers that frame the answer area of a page
-            area_markers = order_points(get_outmost_points(corners))
+                # Get the path to save the answer area
+                diary_file_name = os.path.splitext(os.path.basename(source_file))[0]
 
-            # Get the answer area of a pge
-            extracted_area = perspective_transform(original_image, area_markers)
+                # Create folder to save the individual answer areas
+                extracted_pages_folder = os.path.join(EXTRACTED_AREAS_DIR, diary_file_name)
+                if not os.path.exists(extracted_pages_folder):
+                    os.makedirs(extracted_pages_folder)
 
-            # Get the path to save the answer area
-            diary_file_name = os.path.splitext(os.path.basename(source_file))[0]
+                # Save the current answer_area to a file
+                extracted_answer_area_path = os.path.join(extracted_pages_folder, "answer_area_page_{}.tif".format(page_number))
+                cv2.imwrite(extracted_answer_area_path, extracted_area)
 
-            # Create folder to save the individual answer areas
-            extracted_pages_folder = os.path.join(EXTRACTED_AREAS_DIR, diary_file_name)
-            if not os.path.exists(extracted_pages_folder):
-                os.makedirs(extracted_pages_folder)
+                # Save the path of the extracted answer area
+                extracted_answer_area_paths.append(extracted_answer_area_path)
 
-            # Save the current answer_area to a file
-            extracted_answer_area_path = extracted_pages_folder + "/answer_area_page_{}.tif".format(i)
-            cv2.imwrite(extracted_answer_area_path, extracted_area)
-
-            # Save the path of the extracted answer area
-            extracted_answer_area_paths.append(extracted_answer_area_path)
-
-        except EOFError as error:
-            print(error)
+            except EOFError as error:
+                print(error)
+        page_number += 1
     return extracted_answer_area_paths
 
 #############################################################
@@ -353,6 +374,7 @@ def encode_page(answer_area_path, answer_key, date):
     """Encode an answer_area based on an answer_key"""
 
     encoded_answers = []
+    encoded_answers2 = {}
     answer_area = clean_image(answer_area_path)
 
     for answer in answer_key:
@@ -371,7 +393,15 @@ def encode_page(answer_area_path, answer_key, date):
         # count this answer as positive
         if black > (answer["black_pixels"] * MARK_BLACK_THRESHOLD):
             #diff = black / answer["black_pixels"]
-            encoded_answers.append([date.strftime("%d/%m/%Y"),
+            answer_key = "{}#{}".format(date.strftime("%Y-%m-%d"), answer["entry"])
+            if answer_key not in encoded_answers2:
+                encoded_answers2[answer_key] = {answer["variable"]: answer["value"]}
+            else:
+                if answer["variable"] not in encoded_answers2[answer_key]:
+                    encoded_answers2[answer_key].update({answer["variable"]: answer["value"]})
+                else:
+                    encoded_answers2[answer_key].update({answer["variable"]: "DUPLICATED"})
+            encoded_answers.append([date.strftime("%Y-%m-%d"),
                                     answer["entry"],
                                     answer["variable"],
                                     answer["value"]])
@@ -383,16 +413,14 @@ def encode_page(answer_area_path, answer_key, date):
                                                      answer["variable"],
                                                      answer["value"]))
 
-    return encoded_answers
+    return encoded_answers2
 
 def get_files_in_directory(directory_path, extension):
     """Get all files in a directory with extension"""
-    files = []
-    directory = os.fsencode(directory_path)
-    for file in os.listdir(directory):
-        filename = os.fsdecode(file)
-        if filename.endswith(extension):
-            files.append(os.fsdecode(os.path.join(directory, file)))
+
+    files = [str(path) for path in Path(directory_path).glob("**/*{}".format(extension))]
+    files = natsorted(files, alg=ns.PATH) 
+
     return files
 
 def save_encoded_answers(file_name, diary_answers):
@@ -401,10 +429,15 @@ def save_encoded_answers(file_name, diary_answers):
     encoded_diary_path = os.path.join(ENCODED_DIARIES_DIR, file_name + ".csv")
     with open(encoded_diary_path, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(["page", "date", "entry", "variable", "value"])
+        writer.writerow(["date","entry","hour","ampm","minute","symptomA","symptomB","symptomC"])
         for page, answers in diary_answers.items():
-            for answer in answers:
-                writer.writerow([page] + answer)
+            for key, values in answers.items():
+                row = key.split("#") + [values.get("hh"), values.get("day"), values.get("mm"), 
+                                 values.get("s1"), values.get("s2"), values.get("s3")]
+                
+                # If there is a missing value, make it explicit
+                row = ['MISSING' if v is None else v for v in row]
+                writer.writerow(row)
     return encoded_diary_path
 
 def encode_diary(diary_path, rubric, starting_date):
@@ -417,17 +450,22 @@ def encode_diary(diary_path, rubric, starting_date):
     starting_date -- each page of the encoded diary will be asigned a date starting from this.
     """
     # Get the first tif file in TEMPLATE_DIR (it should not have any pen marks)
-    encoding_template = get_files_in_directory(TEMPLATE_DIR, ".tif")[0]
+    tif_files = get_files_in_directory(TEMPLATE_DIR, ".tif")
+    if tif_files:
+        encoding_template = tif_files[0]
+    else:
+        encoding_template = get_files_in_directory(TEMPLATE_DIR, ".png")[0]
 
+    
     # Get the answer area framed by the L-shaped corners of the first page of the encoding template
     answer_area_path = extract_answer_areas_from_image(encoding_template)[0]
-
+    
     # Get the answer key based on a template and the rubric (answer spaces and their values)
     answer_key = get_answer_key(answer_area_path, rubric)
 
     # Get the answer areas from each page of the diary to encode
     answer_areas_all_pages = extract_answer_areas_from_image(diary_path)
-
+    
     page_id = 1
     diary_encoded_answers = {}
     date = starting_date
@@ -468,8 +506,10 @@ def main():
     """Main method. Everything on this module is self-suficient except for the rubric
     A rubric can be built using the web interface. See static/index.html"""
 
-    # Example of encoding and a rubirc (you usually generate it on the web interface)
-    rubric = "0,hh,12,78.99300699,176.9956522,12\n0,hh,1,111.98601399,183.9956522,12\n0,hh,2,132,208.0065217,12\n0,hh,3,141.9895105,235.9978261,12\n0,hh,4,132.986014,268.9956522,12\n0,hh,5,112.9895105,291.0065217,12\n0,hh,6,79.99300699,299.9978261,12\n0,hh,7,47.98951049,290,12\n0,hh,8,27.98251748,268.9586957,12\n0,hh,9,19.982517483,237.9913043,12\n0,hh,10,27.9965035,207.9891304,12\n0,hh,11,46.98951049,184.9695652,12\n0,day,am,79.99300699,218.9913043,12\n0,day,pm,78.98951049,257.9913043,12\n0,mm,0,179.9895105,176.9934783,12\n0,mm,15,180.993007,217.9956522,12\n0,mm,30,179.993007,258.9956522,12\n0,mm,45,180.9895105,300.9956522,12\n0,s1,0,369.993007,163.9956522,12\n0,s1,1,408.9895105,163.9956522,12\n0,s1,2,446.9895105,163.9934783,12\n0,s1,3,485.993007,164.9978261,12\n0,s2,3,486.9895105,225.9978261,12\n0,s2,2,447.9895105,224.9978261,12\n0,s2,1,407.9895105,224.9978261,12\n0,s2,0,369.993007,224.9978261,12\n0,s3,0,370.9895105,287.9978261,12\n0,s3,1,408.993007,287.9956522,12\n0,s3,2,446.993007,288.9934783,12\n0,s3,3,486.9895105,288.9956522,12\n1,hh,12,79.98951049,465.5652174,12\n1,hh,1,112.9825175,472.5652174,12\n1,hh,2,132.99650350000002,496.576087,12\n1,hh,3,142.986014,524.5673913,12\n1,hh,4,133.9825175,557.5652174,12\n1,hh,5,113.986014,579.576087,12\n1,hh,6,80.98951049,588.5673913,12\n1,hh,7,48.98601399,578.5695652,12\n1,hh,8,28.97902098,557.5282609,12\n1,hh,9,20.979020978999998,526.5608696,12\n1,hh,10,28.99300699,496.5586957,12\n1,hh,11,47.98601399,473.5391304,12\n1,day,am,80.98951049,507.5608696,12\n1,day,pm,79.98601399,546.5608696,12\n1,mm,0,180.986014,465.5630435,12\n1,mm,15,181.9895105,506.5652174,12\n1,mm,30,180.9895105,547.5652174,12\n1,mm,45,181.986014,589.5652174,12\n1,s1,0,370.9895105,452.5652174,12\n1,s1,1,409.986014,452.5652174,12\n1,s1,2,447.986014,452.5630435,12\n1,s1,3,486.9895105,453.5673913,12\n1,s2,3,487.986014,514.5673913,12\n1,s2,2,448.986014,513.5673913,12\n1,s2,1,408.986014,513.5673913,12\n1,s2,0,370.9895105,513.5673913,12\n1,s3,0,371.986014,576.5673913,12\n1,s3,1,409.9895105,576.5652174,12\n1,s3,2,447.9895105,577.5630435,12\n1,s3,3,487.986014,577.5652174,12\n2,hh,12,79.98951049,689.0782609,12\n2,hh,1,112.9825175,696.0782609,12\n2,hh,2,132.99650350000002,720.0891304,12\n2,hh,3,142.986014,748.0804348,12\n2,hh,4,133.9825175,781.0782609,12\n2,hh,5,113.986014,803.0891304,12\n2,hh,6,80.98951049,812.0804348,12\n2,hh,7,48.98601399,802.0826087,12\n2,hh,8,28.97902098,781.0413043,12\n2,hh,9,20.979020978999998,750.073913,12\n2,hh,10,28.99300699,720.0717391,12\n2,hh,11,47.98601399,697.0521739,12\n2,day,am,80.98951049,731.073913,12\n2,day,pm,79.98601399,770.073913,12\n2,mm,0,180.986014,689.076087,12\n2,mm,15,181.9895105,730.0782609,12\n2,mm,30,180.9895105,771.0782609,12\n2,mm,45,181.986014,813.0782609,12\n2,s1,0,370.9895105,676.0782609,12\n2,s1,1,409.986014,676.0782609,12\n2,s1,2,447.986014,676.076087,12\n2,s1,3,486.9895105,677.0804348,12\n2,s2,3,487.986014,738.0804348,12\n2,s2,2,448.986014,737.0804348,12\n2,s2,1,408.986014,737.0804348,12\n2,s2,0,370.9895105,737.0804348,12\n2,s3,0,371.986014,800.0804348,12\n2,s3,1,409.9895105,800.0782609,12\n2,s3,2,447.9895105,801.076087,12\n2,s3,3,487.986014,801.0782609,12"
-    diaries_encoded_answers = encode_diaries(rubric, valid_date("01/10/2017"))
+    # Example of encoding and a rubirc (you usually generate it on the web interface). ONLY FOR TESTING
+    # rubric = "0,hh,12,78.99300699,176.9956522,12\n0,hh,1,111.98601399,183.9956522,12\n0,hh,2,132,208.0065217,12\n0,hh,3,141.9895105,235.9978261,12\n0,hh,4,132.986014,268.9956522,12\n0,hh,5,112.9895105,291.0065217,12\n0,hh,6,79.99300699,299.9978261,12\n0,hh,7,47.98951049,290,12\n0,hh,8,27.98251748,268.9586957,12\n0,hh,9,19.982517483,237.9913043,12\n0,hh,10,27.9965035,207.9891304,12\n0,hh,11,46.98951049,184.9695652,12\n0,day,am,79.99300699,218.9913043,12\n0,day,pm,78.98951049,257.9913043,12\n0,mm,0,179.9895105,176.9934783,12\n0,mm,15,180.993007,217.9956522,12\n0,mm,30,179.993007,258.9956522,12\n0,mm,45,180.9895105,300.9956522,12\n0,s1,0,369.993007,163.9956522,12\n0,s1,1,408.9895105,163.9956522,12\n0,s1,2,446.9895105,163.9934783,12\n0,s1,3,485.993007,164.9978261,12\n0,s2,3,486.9895105,225.9978261,12\n0,s2,2,447.9895105,224.9978261,12\n0,s2,1,407.9895105,224.9978261,12\n0,s2,0,369.993007,224.9978261,12\n0,s3,0,370.9895105,287.9978261,12\n0,s3,1,408.993007,287.9956522,12\n0,s3,2,446.993007,288.9934783,12\n0,s3,3,486.9895105,288.9956522,12\n1,hh,12,79.98951049,465.5652174,12\n1,hh,1,112.9825175,472.5652174,12\n1,hh,2,132.99650350000002,496.576087,12\n1,hh,3,142.986014,524.5673913,12\n1,hh,4,133.9825175,557.5652174,12\n1,hh,5,113.986014,579.576087,12\n1,hh,6,80.98951049,588.5673913,12\n1,hh,7,48.98601399,578.5695652,12\n1,hh,8,28.97902098,557.5282609,12\n1,hh,9,20.979020978999998,526.5608696,12\n1,hh,10,28.99300699,496.5586957,12\n1,hh,11,47.98601399,473.5391304,12\n1,day,am,80.98951049,507.5608696,12\n1,day,pm,79.98601399,546.5608696,12\n1,mm,0,180.986014,465.5630435,12\n1,mm,15,181.9895105,506.5652174,12\n1,mm,30,180.9895105,547.5652174,12\n1,mm,45,181.986014,589.5652174,12\n1,s1,0,370.9895105,452.5652174,12\n1,s1,1,409.986014,452.5652174,12\n1,s1,2,447.986014,452.5630435,12\n1,s1,3,486.9895105,453.5673913,12\n1,s2,3,487.986014,514.5673913,12\n1,s2,2,448.986014,513.5673913,12\n1,s2,1,408.986014,513.5673913,12\n1,s2,0,370.9895105,513.5673913,12\n1,s3,0,371.986014,576.5673913,12\n1,s3,1,409.9895105,576.5652174,12\n1,s3,2,447.9895105,577.5630435,12\n1,s3,3,487.986014,577.5652174,12\n2,hh,12,79.98951049,689.0782609,12\n2,hh,1,112.9825175,696.0782609,12\n2,hh,2,132.99650350000002,720.0891304,12\n2,hh,3,142.986014,748.0804348,12\n2,hh,4,133.9825175,781.0782609,12\n2,hh,5,113.986014,803.0891304,12\n2,hh,6,80.98951049,812.0804348,12\n2,hh,7,48.98601399,802.0826087,12\n2,hh,8,28.97902098,781.0413043,12\n2,hh,9,20.979020978999998,750.073913,12\n2,hh,10,28.99300699,720.0717391,12\n2,hh,11,47.98601399,697.0521739,12\n2,day,am,80.98951049,731.073913,12\n2,day,pm,79.98601399,770.073913,12\n2,mm,0,180.986014,689.076087,12\n2,mm,15,181.9895105,730.0782609,12\n2,mm,30,180.9895105,771.0782609,12\n2,mm,45,181.986014,813.0782609,12\n2,s1,0,370.9895105,676.0782609,12\n2,s1,1,409.986014,676.0782609,12\n2,s1,2,447.986014,676.076087,12\n2,s1,3,486.9895105,677.0804348,12\n2,s2,3,487.986014,738.0804348,12\n2,s2,2,448.986014,737.0804348,12\n2,s2,1,408.986014,737.0804348,12\n2,s2,0,370.9895105,737.0804348,12\n2,s3,0,371.986014,800.0804348,12\n2,s3,1,409.9895105,800.0782609,12\n2,s3,2,447.9895105,801.076087,12\n2,s3,3,487.986014,801.0782609,12"
+    # diaries_encoded_answers = encode_diary(r"C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\input\3_diaries_to_encode\P05.zip", rubric, valid_date("01/10/2017"))
+    # print(diaries_encoded_answers)
+    print(get_files_in_directory(r'C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\output\temporal\diary_pages\P01\P01', '.png'))
 if __name__ == '__main__':
     main()

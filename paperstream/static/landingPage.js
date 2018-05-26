@@ -1,5 +1,13 @@
 (function indexJS() {
   $(document).ready(() => {
+    function notifyUser(message, typeString) {
+      new Noty({
+        text: message,
+        type: typeString,
+        theme: 'metroui',
+      }).show();
+    }
+
     $('#deleteCreationTemplates').hide();
     $('#deleteEncodingTemplate').hide();
     $('#deleteEncodingDiaries').hide();
@@ -18,14 +26,14 @@
 
     const encodingCreationTemplate = new Dropzone('#dropZone2', {
       url: '/upload_files', // Set the url
-      acceptedFiles: 'image/tiff',
+      acceptedFiles: 'image/tiff, image/png',
       maxFiles: '1',
       clickable: '.loadEncodingTemplate-button',
     });
 
     const encodingCreationDiaries = new Dropzone('#dropZone3', {
       url: '/upload_files', // Set the url
-      acceptedFiles: 'image/tiff',
+      acceptedFiles: 'image/tiff, application/zip, application/x-zip-compressed',
       clickable: '.loadEncodingDiaries-button',
     });
 
@@ -42,7 +50,7 @@
         document.querySelector('#progress-bar-container').style.opacity = '1';
       });
 
-      dropzoneCreationTemplate.on('complete', (file) => {
+      dropzoneCreationTemplate.on('success', (file) => {
         // Append uploaded files to list
         $('#diariesTemplates').append(`<li>${file.name}</li>`);
         encodeTemplate = file.name;
@@ -64,7 +72,7 @@
         data.append('folder', 'encodingTemplate');
       });
 
-      encodingCreationTemplate.on('complete', (file) => {
+      encodingCreationTemplate.on('success', (file) => {
         // Append uploaded files to list
         $('#encodingTemplateList').append(`<li>${file.name}</li>`);
       });
@@ -92,9 +100,15 @@
         document.querySelector('#progress-bar-encoding-container').style.opacity = '1';
       });
 
-      encodingCreationDiaries.on('complete', (file) => {
-        // Append uploaded files to list
+      encodingCreationDiaries.on('error', (file, error) => {
+        // Upload failed
+        notifyUser(`Error while uploading :${error}`, 'error');
+      });
+
+      encodingCreationDiaries.on('success', (file) => {
+        // Upload was successful
         $('#encodingDiariesList').append(`<li>${file.name}</li>`);
+        notifyUser('Upload successful', 'success');
       });
       // Hide the total progress bar when nothing's uploading anymore
       encodingCreationDiaries.on('queuecomplete', (progress) => {
@@ -182,11 +196,7 @@
           folder: folderName,
         }),
       ).done((data) => {
-        new Noty({
-          text: 'All templates deleted',
-          type: 'success',
-          theme: 'metroui',
-        }).show();
+        notifyUser('All templates deleted', 'success');
         callbackDone();
       }).fail((xhr, status, error) => {
         console.log(`Error deleting files in ${folderName}`);

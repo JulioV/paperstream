@@ -26,9 +26,10 @@ requires = ["opencv_python (>=3.3.0.10)",
         "Pillow (>=4.3.0)",
         "PyPDF2 (>=1.26.0)",
         "reportlab (>=3.4.0)",
+        "natsort (>=5.1.1)",
 ]
 
-requires-python = ">=3"
+requires-python = ">=3.5"
 
 [tool.flit.scripts]
 paperstream = "paperstream.__main__:main"
