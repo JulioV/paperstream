@@ -34,6 +34,14 @@
     const font = $('#font').val();
     const diariesToDownload = [];
 
+    if (!(moment(date, 'DD/MM/YYYY',true).isValid() || moment(date, 'DD-MM-YYYY',true).isValid())){
+      new Noty({
+        text: `Date has the wrong format. Make sure it is DD/MM/YYYY`,
+        type: 'error',
+        theme: 'metroui',
+      }).show();
+      return;
+    }
 
     $.LoadingOverlay('show', {
       custom: customElement,
@@ -112,10 +120,10 @@
     // Get a list of all the templates that will become diaries
     $.get('/pdf_template_diaries').done((data) => {
       if (data.templates_file_names.length < 1) {
-        $('#diaries_to_create').append('<li> Make sure the PDF templates for your diaries are in input/1_diaries_to_create/</li>');
+        $('#diariesToCreateWarning').append('No PDF templates found. Make sure the PDF templates for your diaries are loaded.');
         $('#createDiaries').attr('disabled', true);
       }
-      Object.entries(data.templates_file_names).forEach(([, value]) => $('#diaries_to_create').append(`<li>${value}</li>`));
+      Object.entries(data.templates_file_names).forEach(([, value]) => $('#diaries_to_create').append(`<option disabled="true" class="combo_list_item">${value}</option>`));
       Object.entries(data.templates_paths).forEach(([, value]) => diaryTemplates.push(value));
     });
     $('#pages').val(2);

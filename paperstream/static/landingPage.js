@@ -52,7 +52,7 @@
 
       dropzoneCreationTemplate.on('success', (file) => {
         // Append uploaded files to list
-        $('#diariesTemplates').append(`<li>${file.name}</li>`);
+        $('#diariesTemplates').append(`<option disabled="true" class="combo_list_item">${file.name}</option>`);
         encodeTemplate = file.name;
       });
       // Hide the total progress bar when nothing's uploading anymore
@@ -107,7 +107,7 @@
 
       encodingCreationDiaries.on('success', (file) => {
         // Upload was successful
-        $('#encodingDiariesList').append(`<li>${file.name}</li>`);
+        $('#encodingDiariesList').append(`<option disabled="true" class="combo_list_item">${file.name}</option>`);
         notifyUser('Upload successful', 'success');
       });
       // Hide the total progress bar when nothing's uploading anymore
@@ -127,14 +127,14 @@
     // Get a list of all the templates that will become diaries
     function checkCreationTemplatesInServer() {
       $.get('/pdf_template_diaries').done((data) => {
-        $('#diariesTemplates > li').remove();
+        $('#diariesTemplates > option').remove();
         if (data.templates_file_names.length < 1) {
           $('#deleteCreationTemplates').attr('disabled', true);
           $('#createDiaries').attr('disabled', true);
           $('#deleteCreationTemplates').hide();
         } else {
           $('#deleteCreationTemplates').show();
-          Object.entries(data.templates_file_names).forEach(([, value]) => $('#diariesTemplates').append(`<li>${value}</li>`));
+          Object.entries(data.templates_file_names).forEach(([, value]) => $('#diariesTemplates').append(`<option disabled="true" class="combo_list_item">${value}</option>`));
           Object.entries(data.templates_paths).forEach(([, value]) => diaryTemplates.push(value));
         }
       });
@@ -165,7 +165,7 @@
     // Get a list of all the diaries to encode
     function checkEncodingDiariesInServer() {
       $.get('/scanned_diaries').done((data) => {
-        $('#encodingDiariesList > li').remove();
+        $('#encodingDiariesList > option').remove();
         if (data.diaries.length < 1) {
           $('#deleteEncodingDiaries').attr('disabled', true);
           $('#encodeDiaries').attr('disabled', true);
@@ -175,7 +175,7 @@
           if (encodeTemplate !== '') {
             $('#encodeDiaries').attr('disabled', false);
           }
-          Object.entries(data.diaries).forEach(([, value]) => $('#encodingDiariesList').append(`<li>${value}</li>`));
+          Object.entries(data.diaries).forEach(([, value]) => $('#encodingDiariesList').append(`<option disabled="true" class="combo_list_item">${value}</option>`));
           Object.entries(data.diaries_paths).forEach(([, value]) => scannedDiaries.push(value));
         }
       });

@@ -20,7 +20,7 @@
             <div class="w3-display-container" style="height:918px;">
                 <div class="w3-card-4 w3-display-topmiddle" style="width:75%">
                     <div class="w3-container w3-blue-gray w3-center">
-                        <h2> Create rubric for encoding </h2>
+                        <h2> Create Marking Rubric </h2>
                     </div>
                     <div class="w3-container w3-padding-large w3-center">
                         <div class="w3-row-padding">
@@ -66,12 +66,12 @@
                 </div>
                 <div class="w3-card-4 w3-display-middle" style="width:75%">
                     <div class="w3-container w3-blue-gray w3-center">
-                        <h2> Canvas backup </h2>
+                        <h2> Backup Marking Rubric </h2>
                     </div>
                     <div class="w3-container w3-padding-large w3-center">
                         <div class="w3-row-padding w3-padding-small">
                             <div class="w3-half">
-                                Download Backup
+                                Download rubric as CSV file
                             </div>
                             <div class="w3-half">
                                 <button id="downloadCanvasBackup" class="w3-button w3-blue w3-large">Download</button>
@@ -79,7 +79,7 @@
                         </div>
                         <div class="w3-row-padding w3-padding-small">
                             <div class="w3-half">
-                                Load Backup
+                                Load rubric from CSV file
                             </div>
                             <div class="w3-half">
                                 <input id="loadCSVCanvasBackup" type="file" value="Load Canvas Backup" class="w3-button w3-blue w3-large" style="width: 100%"
@@ -95,8 +95,11 @@
                     <div class="w3-container w3-padding-large">
                         <div class="w3-row">
                             <div class="w3-half w3-container">
-                                <h4>Diaries to encode:</h4>
-                                <ul id="diariesToEncode" class="w3-ul"></ul>
+                                <label class="w3-text-blue">
+                                    <b>Diaries to encode</b>
+                                </label>
+                                <select id="diariesToEncode" size="4" class="combo_list"></select>
+                                <p id="diariesToEncodeWarning"></p>
                             </div>
                             <div class="w3-half w3-container">
                                 <label class="w3-text-blue">
@@ -104,7 +107,7 @@
                                 </label>
                                 <input id="date" class="w3-input w3-border" style="width:100%;margin-bottom:20px" />
                                 <div class="w3-margin-bottom">
-                                    <button id="encodeDiaries" class="w3-button w3-blue w3-large encodeDiaries">Encode Diaries</button>
+                                    <button id="encodeDiaries" class="w3-button w3-blue w3-large encodeDiaries">Encode All Diaries</button>
                                 </div>
                             </div>
 
@@ -123,6 +126,7 @@
 <script type="text/javascript" src="async.min.js"></script>
 <link href="noty.css" rel="stylesheet">
 <script src="noty.js" type="text/javascript"></script>
+<script src="moment.min.js" type="text/javascript"></script>
 <script src="encode.js"></script>
 </script>
 

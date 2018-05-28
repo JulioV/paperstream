@@ -13,8 +13,12 @@
                     <h2> Create paper diaries </h2>
                 </div>
                 <div class="w3-container w3-padding-large w3-col s6">
-                    <h4>PDF templates of the diaries to create:</h4>
-                    <ul id="diaries_to_create" class="w3-ul"></ul>
+                    <label class="w3-text-blue">
+                            <b>PDF templates of the diaries to create</b>
+                    </label>
+                    <br/>
+                    <select style="margin-top:15px" id="diaries_to_create" size="4" class="combo_list"></select>
+                    <p id="diariesToCreateWarning"></p>                    
                 </div>
                 <div class="w3-container w3-padding-large w3-col s6">
                     <label class="w3-text-blue">
@@ -50,6 +54,7 @@
 <script type="text/javascript" src="async.min.js"></script>
 <link href="noty.css" rel="stylesheet">
 <script src="noty.js" type="text/javascript"></script>
+<script src="moment.min.js" type="text/javascript"></script>
 <script src="create.js"></script>
 </script>
 

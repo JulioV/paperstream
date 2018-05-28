@@ -74,3 +74,19 @@ html,body,h1,h2,h3,h4,h5,h6 {
   .slider.round:before {
     border-radius: 50%;
   }
+
+  .combo_list{
+    border: 1px solid #fff;
+    margin:5px;
+    overflow-y:auto;
+  }
+  .combo_list_item{
+    padding: 7px 20px 7px 5px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+  .combo_list_item:disabled{
+    color:black;
+  }

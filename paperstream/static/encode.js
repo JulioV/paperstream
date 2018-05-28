@@ -307,6 +307,14 @@
     const rubric = createEncodingRubric();
 
     const date = $('#date').val();
+    if (!(moment(date, 'DD/MM/YYYY',true).isValid() || moment(date, 'DD-MM-YYYY',true).isValid())){
+      new Noty({
+        text: `Date has the wrong format. Make sure it is DD/MM/YYYY`,
+        type: 'error',
+        theme: 'metroui',
+      }).show();
+      return;
+    }
     const answersToDownload = [];
 
 
@@ -359,6 +367,11 @@
             a.style.display = 'none';
             document.body.appendChild(a);
             a.click();
+            new Noty({
+              text: `Diaries successfully encoded`,
+              type: 'success',
+              theme: 'metroui',
+            }).show();            
           }).fail((xhr, status, errorZip) => {
             new Noty({
               text: `Error creating zip file. Message: ${errorZip}`,
@@ -392,10 +405,10 @@
     // Get the list of diaries to encode
     $.get('/scanned_diaries').done((data) => {
       if (data.diaries.length < 1) {
-        $('#diariesToEncode').append('<li> Make sure your scanned diaries (tiff) are in input/3_diaries_to_encode/</li>');
+        $('#diariesToEncodeWarning').append('No diaries found. Make sure your scanned diaries are loaded');
         $('#encodeDiaries').attr('disabled', true);
       }
-      Object.values(data.diaries).forEach(diary => $('#diariesToEncode').append(`<li>${diary}</li>`));
+      Object.values(data.diaries).forEach(diary => $('#diariesToEncode').append(`<option disabled="true" class="combo_list_item">${diary}</option>`));
       Object.values(data.diaries_paths).forEach(diaryPath => diariesToEncode.push(diaryPath));
     });
   });
