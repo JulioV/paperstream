@@ -3,4 +3,5 @@ paperstream/__pycache__/
 .vscode/
 paperstream/build/
 t-env/
+test/__pycache__/
 *.bat

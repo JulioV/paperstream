@@ -6,10 +6,13 @@ import falcon
 import json
 import paperstream.encode_diary as encode
 import paperstream.create_diary as create
+import paperstream.extract_framed_area as extract
 import cv2
 import traceback
 import zipfile
 import sys
+import logging
+from logging.config import fileConfig
 
 from paperstream.static_resources_middleware import StaticResourcesMiddleware
 from falcon_multipart.middleware import MultipartMiddleware
@@ -22,6 +25,11 @@ def resource_path(relative_path):
 # These paths are for the web interface, don't call resource_path
 WEB_ANSWER_AREA_PATH = resource_path("static/template.png")
 DOWNLOADS_DIR = r"static/downloads"
+DIARIES_TO_CREATE_DIR = resource_path("input/1_diaries_to_create/")
+TEMPLATE_DIR = resource_path("input/2_template_to_encode/")
+DIARIES_TO_ENCODE_DIR = resource_path("input/3_diaries_to_encode/")
+
+fileConfig(resource_path("log_configuration.ini"))
 
 
 class TemplateResource(object):
@@ -44,15 +52,18 @@ class TemplateResource(object):
 
     def extract_template_answer_area():
         """ Extracts the answer area from a TIF or PNG file """
-        tif_files = encode.get_files_in_directory(encode.TEMPLATE_DIR, ".tif")
-        png_files = encode.get_files_in_directory(encode.TEMPLATE_DIR, ".png")
+        tif_files = encode.get_files_in_directory(TEMPLATE_DIR, ".tif")
+        png_files = encode.get_files_in_directory(TEMPLATE_DIR, ".png")
         files = tif_files + png_files
 
         # If there is at least one tif or png file in the template dir
         if files:
             template_path = files[0]
             try:
-                template_answer_area = encode.get_first_page_answer_area(template_path)
+                template_answer_area = cv2.imread(extract.extract_answer_area_from_page(template_path, 
+                                                  encode.EXTRACTED_PAGES_DIR, 
+                                                  encode.EXTRACTED_AREAS_DIR,
+                                                  page_limit=1)[0])
                 image_saved = cv2.imwrite(WEB_ANSWER_AREA_PATH, template_answer_area)
                 if not image_saved:
                     return (False, "saving")
@@ -68,8 +79,8 @@ class ScannedDiariesResource(object):
     def on_get(self, req, resp):
         """Returns a list of all of the tif files (diaries) present in DIARIES_TO_ENCODE_DIR"""
         resp.set_header('Content-Type', 'text/json')
-        tif_paths = encode.get_files_in_directory(encode.DIARIES_TO_ENCODE_DIR, ".tif")
-        zip_paths = encode.get_files_in_directory(encode.DIARIES_TO_ENCODE_DIR, ".zip")
+        tif_paths = encode.get_files_in_directory(DIARIES_TO_ENCODE_DIR, ".tif")
+        zip_paths = encode.get_files_in_directory(DIARIES_TO_ENCODE_DIR, ".zip")
         diaries_paths = tif_paths + zip_paths
         def extract_file_name(path): return os.path.basename(path)
         resp.body = json.dumps({"diaries": list(map(extract_file_name, diaries_paths)),
@@ -80,7 +91,7 @@ class PDFTemplateDiariesResource(object):
     def on_get(self, req, resp):
         """Returns a list of all of the PDF files (templates) present in DIARIES_TO_CREATE_DIR"""
         resp.set_header('Content-Type', 'text/json')
-        diaries_paths = encode.get_files_in_directory(encode.DIARIES_TO_CREATE_DIR, ".pdf")
+        diaries_paths = encode.get_files_in_directory(DIARIES_TO_CREATE_DIR, ".pdf")
 
         def extract_file_name(path): return os.path.basename(path)
         resp.body = json.dumps({"templates_file_names": list(map(extract_file_name, diaries_paths)),
@@ -93,6 +104,8 @@ class EncodeResource(object):
         Encodes a diary (tif or zip file) based on a rubric (created in the web interface) and a blank 
         page of the diary (tif or zip file) present in TEMPLATE_DIR
         """
+        LOGGER = logging.getLogger()
+        
         resp.set_header('Content-Type', 'text/json')
         raw_json = req.stream.read().decode('utf-8')
         content = json.loads(raw_json, encoding='utf-8')
@@ -101,16 +114,12 @@ class EncodeResource(object):
             rubric = content.get("rubric")
             diary_path = content.get("diary")
             date = content.get("date")
-            date = encode.valid_date(date)
 
-            encoded_diary = encode.encode_diary(diary_path, rubric, date)
-            resp.body = json.dumps(encoded_diary)
-
-            print("Diary Encoded: " + json.dumps(encoded_diary))
+            encoded_diary = encode.encode_diary(diary_path, TEMPLATE_DIR, rubric, date)
+            resp.body = json.dumps(str(encoded_diary))
+            LOGGER.info("Diary encoded {}".format(encoded_diary.stem))
         except Exception as e:
-            print(str(type(e)))
-            print(str(e))
-            print(traceback.print_tb(e.__traceback__))
+            LOGGER.error("Error encoding diary" , exc_info=True)
             raise falcon.HTTPInternalServerError(title="Error encoding diary: " + str(type(e)),
                                                  description=(str(e) +
                                                               ','.join(traceback.format_tb(e.__traceback__))))
@@ -119,6 +128,8 @@ class EncodeResource(object):
 class CreateResource(object):
     def on_post(self, req, resp):
         """Creates a diary based on a PDF template"""
+        LOGGER = logging.getLogger()
+        
         resp.set_header('Content-Type', 'text/json')
 
         raw_json = req.stream.read().decode('utf-8')
@@ -140,11 +151,9 @@ class CreateResource(object):
 
             a5_booklet = create.convert_to_a5_booklet(a4_diary)
             resp.body = json.dumps([str(a4_diary), str(a5_booklet)])
-
+            LOGGER.info("Diary created {}".format(pdf_template))            
         except Exception as e:
-            print(str(type(e)))
-            print(str(e))
-            print(traceback.print_tb(e.__traceback__))
+            LOGGER.error("Error creating diary" , exc_info=True)
             raise falcon.HTTPInternalServerError(title="Error creating diary: " + str(type(e)),
                                                  description=(str(e) +
                                                               ','.join(traceback.format_tb(e.__traceback__))))
@@ -180,6 +189,8 @@ class DownloadFilesResource(object):
 
     def on_post(self, req, resp):
         """Handles the compression of files into a zip file"""
+        LOGGER = logging.getLogger()
+        
         resp.set_header('Content-Type', 'text/json')
         raw_json = req.stream.read().decode('utf-8')
         content = json.loads(raw_json, encoding='utf-8')
@@ -189,12 +200,9 @@ class DownloadFilesResource(object):
             zip_name = content.get("name")
             zip_file = DownloadFilesResource.compress_files(files, zip_name)
             resp.body = json.dumps({'file': zip_file})
-            print("Zip created")
+            LOGGER.info("Zip created and ready to download")
         except Exception as e:
-            print(str(type(e)))
-            print(str(e))
-            print(traceback.print_tb(e.__traceback__))
-
+            LOGGER.error("Error creating zip file" , exc_info=True)
             raise falcon.HTTPInternalServerError(title="Error downloading files: " + str(type(e)),
                                                  description=(str(e) +
                                                               ','.join(traceback.format_tb(e.__traceback__))))
@@ -206,16 +214,16 @@ class UploadFilesResource(object):
         folder = req.get_param('folder')
         if folder == "creation":
             filename = file.filename
-            with(open(os.path.join(encode.DIARIES_TO_CREATE_DIR, filename), 'wb')) as writer:
+            with(open(os.path.join(DIARIES_TO_CREATE_DIR, filename), 'wb')) as writer:
                 writer.write(file.file.read())
         elif folder == "encodingTemplate":
             filename = file.filename
-            with(open(os.path.join(encode.TEMPLATE_DIR, filename), 'wb')) as writer:
+            with(open(os.path.join(TEMPLATE_DIR, filename), 'wb')) as writer:
                 writer.write(file.file.read())
             # UploadFilesResource.reload_template()
         elif folder == "encodingDiaries":
             filename = file.filename
-            with(open(os.path.join(encode.DIARIES_TO_ENCODE_DIR, filename), 'wb')) as writer:
+            with(open(os.path.join(DIARIES_TO_ENCODE_DIR, filename), 'wb')) as writer:
                 writer.write(file.file.read())
     def reload_template():
         success, code = TemplateResource.extract_template_answer_area()
@@ -237,13 +245,13 @@ class DeleteFilesResource(object):
 
         folder = content.get("folder")
         if folder == "creation":
-            DeleteFilesResource.delete_all_files_in_dir(".pdf", encode.DIARIES_TO_CREATE_DIR)
+            DeleteFilesResource.delete_all_files_in_dir(".pdf", DIARIES_TO_CREATE_DIR)
         elif folder == "encodingTemplate":
-            DeleteFilesResource.delete_all_files_in_dir(".tif", encode.TEMPLATE_DIR)
-            DeleteFilesResource.delete_all_files_in_dir(".png", encode.TEMPLATE_DIR)
+            DeleteFilesResource.delete_all_files_in_dir(".tif", TEMPLATE_DIR)
+            DeleteFilesResource.delete_all_files_in_dir(".png", TEMPLATE_DIR)
         elif folder == "encodingDiaries":
-            DeleteFilesResource.delete_all_files_in_dir(".tif", encode.DIARIES_TO_ENCODE_DIR)
-            DeleteFilesResource.delete_all_files_in_dir(".zip", encode.DIARIES_TO_ENCODE_DIR)
+            DeleteFilesResource.delete_all_files_in_dir(".tif", DIARIES_TO_ENCODE_DIR)
+            DeleteFilesResource.delete_all_files_in_dir(".zip", DIARIES_TO_ENCODE_DIR)
 
         resp.body = json.dumps({"response": "ok"})
 

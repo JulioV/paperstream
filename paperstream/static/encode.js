@@ -330,7 +330,7 @@
           itemCompleted(null);
         }).fail((xhr, status, individualError) => {
           new Noty({
-            text: `Error encoding ${item}. Message: ${individualError}`,
+            text: `Error encoding ${item.split('\\').pop().split('/').pop()} Message: ${individualError}`,
             type: 'error',
             theme: 'metroui',
           }).show();
@@ -342,11 +342,7 @@
         $.LoadingOverlay('hide');
         if (globalError != null) {
           // error
-          new Noty({
-            text: `Error encoding the diaries. Message: ${globalError}`,
-            type: 'error',
-            theme: 'metroui',
-          }).show();
+          
         } else {
           // Ask the server to zip all the encoding diaries (CSV files)
           $.post(
