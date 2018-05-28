@@ -14,7 +14,6 @@ import sys
 import logging
 from logging.config import fileConfig
 
-from paperstream.static_resources_middleware import StaticResourcesMiddleware
 from falcon_multipart.middleware import MultipartMiddleware
 
 def resource_path(relative_path):
@@ -275,12 +274,9 @@ def my_serializer(req, resp, exception):
 # Configure Falcon
 app = falcon.API(middleware=[MultipartMiddleware()])
 
-# Add static routing
-app.add_sink(StaticResourcesMiddleware("static", resource_path("./static")), "")
-
 app.set_error_serializer(my_serializer)
 
-
+app.add_static_route("/static", resource_path("./static"))
 app.add_route('/encoding_template', TemplateResource())
 app.add_route('/scanned_diaries', ScannedDiariesResource())
 app.add_route('/pdf_template_diaries', PDFTemplateDiariesResource())

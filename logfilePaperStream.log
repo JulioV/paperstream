@@ -92,3 +92,32 @@ TypeError: Object of type 'WindowsPath' is not JSON serializable
 2018-05-28 15:03:49,413 root         INFO     Encoding test\input\test_diary_png.zip
 2018-05-28 15:03:56,442 root         INFO     Encoding test\input\test_diary_tif.tif
 2018-05-28 15:03:56,746 root         INFO     Answer key loaded from previous file test\output\temporal\mark_areas\test_template\answer_area_page_0\answer_key.json
+2018-05-28 15:10:13,869 root         INFO     Diary created C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\input\1_diaries_to_create\P01.pdf
+2018-05-28 15:10:15,712 root         INFO     Diary created C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\input\1_diaries_to_create\P02.pdf
+2018-05-28 15:10:17,596 root         INFO     Diary created C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\input\1_diaries_to_create\P03.pdf
+2018-05-28 15:10:17,704 root         INFO     Zip created and ready to download
+2018-05-28 15:10:27,041 root         INFO     Encoding C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\input\3_diaries_to_encode\example_diary_tif.tif
+2018-05-28 15:10:38,529 root         INFO     Diary encoded example_diary_tif
+2018-05-28 15:10:38,539 root         INFO     Encoding C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\input\3_diaries_to_encode\example_diary_png.zip
+2018-05-28 15:10:38,915 root         INFO     Answer key loaded from previous file C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\output/temporal/mark_areas/example_template\answer_area_page_0\answer_key.json
+2018-05-28 15:10:45,884 root         INFO     Diary encoded example_diary_png
+2018-05-28 15:10:45,930 root         INFO     Zip created and ready to download
+2018-05-28 15:11:23,313 root         INFO     Encoding C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\input\3_diaries_to_encode\example_diary_tif.tif
+2018-05-28 15:11:23,780 root         INFO     Answer key loaded from previous file C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\output/temporal/mark_areas/example_template\answer_area_page_0\answer_key.json
+2018-05-28 15:11:34,110 root         INFO     Diary encoded example_diary_tif
+2018-05-28 15:11:34,122 root         INFO     Encoding C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\input\3_diaries_to_encode\example_diary_png.zip
+2018-05-28 15:11:34,480 root         INFO     Answer key loaded from previous file C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\output/temporal/mark_areas/example_template\answer_area_page_0\answer_key.json
+2018-05-28 15:11:41,433 root         INFO     Diary encoded example_diary_png
+2018-05-28 15:11:41,460 root         INFO     Zip created and ready to download
+2018-05-28 15:15:36,797 root         INFO     Diary created C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\input\1_diaries_to_create\P01.pdf
+2018-05-28 15:15:38,679 root         INFO     Diary created C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\input\1_diaries_to_create\P02.pdf
+2018-05-28 15:15:40,563 root         INFO     Diary created C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\input\1_diaries_to_create\P03.pdf
+2018-05-28 15:15:40,621 root         INFO     Zip created and ready to download
+2018-05-28 15:18:32,077 root         INFO     Diary created C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\input\1_diaries_to_create\P01.pdf
+2018-05-28 15:18:34,277 root         INFO     Diary created C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\input\1_diaries_to_create\P02.pdf
+2018-05-28 15:18:36,544 root         INFO     Diary created C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\input\1_diaries_to_create\P03.pdf
+2018-05-28 15:18:36,645 root         INFO     Zip created and ready to download
+2018-05-28 15:19:54,174 root         INFO     Diary created C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\input\1_diaries_to_create\P01.pdf
+2018-05-28 15:19:56,745 root         INFO     Diary created C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\input\1_diaries_to_create\P02.pdf
+2018-05-28 15:19:59,136 root         INFO     Diary created C:\Users\julio\Documents\phd\skip\src\diary\paperstream\paperstream\input\1_diaries_to_create\P03.pdf
+2018-05-28 15:19:59,225 root         INFO     Zip created and ready to download

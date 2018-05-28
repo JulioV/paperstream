@@ -20,7 +20,7 @@ classifiers = ["License :: OSI Approved :: MIT License", "Intended Audience :: S
 description-file = "README.md"
 requires = ["opencv_python (>=3.3.0.10)",
         "waitress (>=1.0.2)",
-        "falcon (>=1.3.0)",
+        "falcon (>=1.4.1)",
         "numpy (>=1.12.1)",
         "falcon_multipart (>=0.2.0)",
         "Pillow (>=4.3.0)",
