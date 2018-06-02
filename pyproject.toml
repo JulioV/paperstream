@@ -29,7 +29,7 @@ requires = ["opencv_python (>=3.3.0.10)",
         "natsort (>=5.1.1)",
 ]
 
-requires-python = ">=3.5"
+requires-python = ">=3.6"
 
 [tool.flit.scripts]
 paperstream = "paperstream.__main__:main"
