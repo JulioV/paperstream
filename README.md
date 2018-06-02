@@ -9,6 +9,7 @@
 ---
 
 ## History
+Version 1.1.0 (2018-06-02) Add support for PNG files, code refactoring, add tests, bug fixes 
 Version 1.0.1 (2018-01-21) Fix bug with font textbox 
 Version 1.0.0 (2017-11-11) - First release.
  
