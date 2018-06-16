@@ -53,7 +53,6 @@
       dropzoneCreationTemplate.on('success', (file) => {
         // Append uploaded files to list
         $('#diariesTemplates').append(`<option disabled="true" class="combo_list_item">${file.name}</option>`);
-        encodeTemplate = file.name;
       });
       // Hide the total progress bar when nothing's uploading anymore
       dropzoneCreationTemplate.on('queuecomplete', (progress) => {
@@ -73,8 +72,8 @@
       });
 
       encodingCreationTemplate.on('success', (file) => {
-        // Append uploaded files to list
-        $('#encodingTemplateList').append(`<li>${file.name}</li>`);
+        // Process encoding template
+        checkEncodingTemplateInServer();
       });
       // Hide the total progress bar when nothing's uploading anymore
       encodingCreationTemplate.on('queuecomplete', (progress) => {

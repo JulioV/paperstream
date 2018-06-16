@@ -7,7 +7,7 @@
       padding: '200px 0 0 0',
       'font-size': '30px',
     },
-    text: "Creating diary 1/8. Please wait and don't refresh the page",
+    text: "Creating document 1/8. Please wait and don't refresh the page",
   });
 
   // Get today's date in format DD/MM/2017
@@ -49,7 +49,7 @@
 
     async.eachOfSeries(
       diaryTemplates, (item, key, itemCompleted) => {
-        customElement.text(`Creating diary ${key + 1}/${diaryTemplates.length}. Please wait and don't refresh the page`);
+        customElement.text(`Creating document ${key + 1}/${diaryTemplates.length}. Please wait and don't refresh the page`);
         $.post(
           '/create_diary',
           JSON.stringify({
@@ -98,7 +98,7 @@
               a.click();
 
               new Noty({
-                text: 'Zip file with diaries created.',
+                text: 'Zip file with documents created.',
                 type: 'success',
                 theme: 'metroui',
               }).show();

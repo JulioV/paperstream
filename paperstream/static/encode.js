@@ -136,7 +136,7 @@
     entry.createAnswerSpace = function createAnswerSpace(xSpace, ySpace, variable, value) {
       if (this.containsVariableValue(variable, value)) {
         new Noty({
-          text: 'Duplicated answer space. Change VARIABLE or VALUE.',
+          text: 'Duplicated answer space. Change its VARIABLE or VALUE.',
           type: 'warning',
           theme: 'metroui',
         }).show();
@@ -325,7 +325,7 @@
     // Executes a post request to /encode_diary for each item in diariesToEncode
     async.eachOfSeries(
       diariesToEncode, (item, key, itemCompleted) => {
-        customElement.text(`Encoding diary ${key + 1}/${diariesToEncode.length}. Please wait and don't refresh the page`);
+        customElement.text(`Encoding document ${key + 1}/${diariesToEncode.length}. Please wait and don't refresh the page`);
         $.post(
           '/encode_diary',
           JSON.stringify({
@@ -368,7 +368,7 @@
             document.body.appendChild(a);
             a.click();
             new Noty({
-              text: `Diaries successfully encoded`,
+              text: `Documents successfully encoded`,
               type: 'success',
               theme: 'metroui',
             }).show();            
