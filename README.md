@@ -9,9 +9,10 @@
 ---
 
 ## History
-Version 1.1.0 (2018-06-02) Add support for PNG files, code refactoring, add tests, bug fixes 
-Version 1.0.1 (2018-01-21) Fix bug with font textbox 
-Version 1.0.0 (2017-11-11) - First release.
+- Version 1.1.1 (2018-06-16) Change wording from diaries to documents, make date optional, and bug fixes in UI after uploading a template
+- Version 1.1.0 (2018-06-02) Add support for PNG files, code refactoring, add tests, bug fixes 
+- Version 1.0.1 (2018-01-21) Fix bug with font textbox 
+- Version 1.0.0 (2017-11-11) - First release.
  
 ## Credits
  

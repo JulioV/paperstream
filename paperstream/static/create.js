@@ -84,7 +84,7 @@
             '/download_files',
             JSON.stringify({
               files: diariesToDownload,
-              name: 'diaries.zip',
+              name: 'documents.zip',
             }),
           )
             .done((data) => {
@@ -92,7 +92,7 @@
               const a = document.createElement('a');
               a.href = `/${data.file}`;
               // Give filename you wish to download
-              a.download = 'diaries.zip';
+              a.download = 'documents.zip';
               a.style.display = 'none';
               document.body.appendChild(a);
               a.click();

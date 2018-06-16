@@ -171,7 +171,7 @@ def create_diary_cover(participant_id, email, font):
     if not (email is None or email == ""):
         cover_canvas.setFont(font, 15)
         cover_canvas.drawCentredString(width/2, 50,
-                                "If you find this diary, please email " + email)
+                                "If you find this document, please email " + email)
 
     cover_canvas.save()
     packet.seek(0)
@@ -212,7 +212,7 @@ def create_diary_page(pdf_template, font, top_left_text, page_number, top_right_
     return new_page
 
 def create_a4_diary(pdf_template, pages, top_left_text, email=None, font='Arial'):
-    """Creates an A4 diary with [PAGES] from [STARTING_DATE]"""
+    """Creates an A4 document with [PAGES] from [STARTING_DATE]"""
 
     starting_date = parse_date(top_left_text)
     font = set_active_font(font)
@@ -223,7 +223,7 @@ def create_a4_diary(pdf_template, pages, top_left_text, email=None, font='Arial'
 
     Path.mkdir(CREATED_DIARIES_DIR, parents=True, exist_ok=True)
     a4_document_name = Path(pdf_template).stem
-    a4_document_path = CREATED_DIARIES_DIR / Path("{}_diary.pdf".format(a4_document_name))
+    a4_document_path = CREATED_DIARIES_DIR / Path("{}_document.pdf".format(a4_document_name))
 
     pdf_file = PdfFileWriter()
 

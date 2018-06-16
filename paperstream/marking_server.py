@@ -116,10 +116,10 @@ class EncodeResource(object):
 
             encoded_diary = encode.encode_diary(diary_path, TEMPLATE_DIR, rubric, date)
             resp.body = json.dumps(str(encoded_diary))
-            LOGGER.info("Diary encoded {}".format(encoded_diary.stem))
+            LOGGER.info("Document encoded {}".format(encoded_diary.stem))
         except Exception as e:
-            LOGGER.error("Error encoding diary" , exc_info=True)
-            raise falcon.HTTPInternalServerError(title="Error encoding diary: " + str(type(e)),
+            LOGGER.error("Error encoding document" , exc_info=True)
+            raise falcon.HTTPInternalServerError(title="Error encoding document: " + str(type(e)),
                                                  description=(str(e) +
                                                               ','.join(traceback.format_tb(e.__traceback__))))
 
@@ -150,10 +150,10 @@ class CreateResource(object):
 
             a5_booklet = create.convert_to_a5_booklet(a4_diary)
             resp.body = json.dumps([str(a4_diary), str(a5_booklet)])
-            LOGGER.info("Diary created {}".format(pdf_template))            
+            LOGGER.info("Document created {}".format(pdf_template))            
         except Exception as e:
-            LOGGER.error("Error creating diary" , exc_info=True)
-            raise falcon.HTTPInternalServerError(title="Error creating diary: " + str(type(e)),
+            LOGGER.error("Error creating document" , exc_info=True)
+            raise falcon.HTTPInternalServerError(title="Error creating document: " + str(type(e)),
                                                  description=(str(e) +
                                                               ','.join(traceback.format_tb(e.__traceback__))))
 
@@ -172,9 +172,9 @@ class DownloadFilesResource(object):
                         base_folder_a4 = os.path.basename(os.path.dirname(a4_document))
                         base_folder_a5 = os.path.basename(os.path.dirname(a5_document))
                         if base_folder_a4 in authorised_folders:
-                            myzip.write(a4_document, "a4_diaries/" + (os.path.basename(a4_document)))
+                            myzip.write(a4_document, "a4_documents/" + (os.path.basename(a4_document)))
                         if base_folder_a5 in authorised_folders:
-                            myzip.write(a5_document, "a5_diaries(to print on A4 paper)/" + (os.path.basename(a5_document)))
+                            myzip.write(a5_document, "a5_documents(to print on A4 paper)/" + (os.path.basename(a5_document)))
                 
                 elif isinstance(files[0], str):
                     for answers_file in files:
