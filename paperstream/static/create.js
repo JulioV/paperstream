@@ -34,14 +34,14 @@
     const font = $('#font').val();
     const diariesToDownload = [];
 
-    if (!(moment(date, 'DD/MM/YYYY',true).isValid() || moment(date, 'DD-MM-YYYY',true).isValid())){
-      new Noty({
-        text: `Date has the wrong format. Make sure it is DD/MM/YYYY`,
-        type: 'error',
-        theme: 'metroui',
-      }).show();
-      return;
-    }
+    // if (!(moment(date, 'DD/MM/YYYY',true).isValid() || moment(date, 'DD-MM-YYYY',true).isValid())){
+    //   new Noty({
+    //     text: `Date has the wrong format. Make sure it is DD/MM/YYYY`,
+    //     type: 'error',
+    //     theme: 'metroui',
+    //   }).show();
+    //   return;
+    // }
 
     $.LoadingOverlay('show', {
       custom: customElement,

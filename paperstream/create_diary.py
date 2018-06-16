@@ -177,14 +177,14 @@ def create_diary_cover(participant_id, email, font):
     packet.seek(0)
     return PdfFileReader(packet).getPage(0)
 
-def create_diary_page(pdf_template, font, starting_date, page_number, a4_document_name):
+def create_diary_page(pdf_template, font, top_left_text, page_number, top_right_text):
     packet = BytesIO()
     diary_canvas = canvas.Canvas(packet, pagesize=A5)
 
     # Header
     diary_canvas.setFont(font, 11)
-    diary_canvas.drawRightString(378, 562, str(a4_document_name))
-    diary_canvas.drawString(36.5, 562, starting_date.strftime('%A, %d %b %Y'))
+    diary_canvas.drawRightString(378, 562, str(top_right_text))
+    diary_canvas.drawString(36.5, 562, top_left_text)
 
     # Corners
     corners = [(CORNER_DIR / Path("corner_ul.png"), 25, 553),
@@ -211,10 +211,10 @@ def create_diary_page(pdf_template, font, starting_date, page_number, a4_documen
 
     return new_page
 
-def create_a4_diary(pdf_template, pages, starting_date, email=None, font='Arial'):
+def create_a4_diary(pdf_template, pages, top_left_text, email=None, font='Arial'):
     """Creates an A4 diary with [PAGES] from [STARTING_DATE]"""
 
-    starting_date = parse_date(starting_date)
+    starting_date = parse_date(top_left_text)
     font = set_active_font(font)
 
     # Create output folder/file
@@ -233,9 +233,11 @@ def create_a4_diary(pdf_template, pages, starting_date, email=None, font='Arial'
 
     # Pages
     for page in range(1, pages+1):
-        new_page = create_diary_page(pdf_template, font, starting_date,page, a4_document_name)
+        if starting_date is not None:
+            top_left_text = starting_date.strftime('%A, %d %b %Y')
+            starting_date += datetime.timedelta(days=1)
+        new_page = create_diary_page(pdf_template, font, top_left_text,page, a4_document_name)
         pdf_file.addPage(new_page)
-        starting_date += datetime.timedelta(days=1)
 
     # Backcover
     pdf_file.addBlankPage()
